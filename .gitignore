@@ -1,0 +1,11 @@
+.build/
+.codex/
+.DS_Store
+._*
+dist/
+*.openeagle
+*.openeaglepack
+__pycache__/
+*.xcuserstate
+.swiftpm/
+test-output/

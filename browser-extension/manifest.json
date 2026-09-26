@@ -1,0 +1,11 @@
+{
+  "manifest_version": 3,
+  "name": "OpenEagle Collector",
+  "version": "1.0.0",
+  "description": "将网页图片、书签和截图保存到本机 OpenEagle 素材库。",
+  "permissions": ["activeTab", "scripting", "storage", "contextMenus"],
+  "host_permissions": ["http://127.0.0.1:41596/*"],
+  "action": { "default_popup": "popup.html", "default_title": "保存到 OpenEagle" },
+  "background": { "service_worker": "background.js" },
+  "options_page": "options.html"
+}

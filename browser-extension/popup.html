@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><link rel="stylesheet" href="style.css"></head><body>
+<header><div class="mark">O</div><div><strong>OpenEagle</strong><small>收藏当下的灵感</small></div><button id="settings" class="quiet" aria-label="设置">⚙</button></header>
+<main>
+<div class="actions"><button id="bookmark">保存网页书签</button><button id="screenshot">截取当前页面</button></div>
+<label>保存到<select id="folder"><option value="">未分类</option></select></label>
+<label>标签<input id="tags" placeholder="灵感、网页设计…"></label>
+<div class="divider"></div>
+<div class="row"><strong>页面图片</strong><span id="count"></span><button id="scan" class="quiet">重新扫描</button></div>
+<div class="row"><label class="inline"><input id="select-all" type="checkbox"> 全选</label><label class="inline">最小宽度 <input id="min-width" type="number" value="160" min="0" max="10000"></label></div>
+<div id="images"></div>
+<button id="save" class="primary">保存所选图片</button>
+<p id="status" role="status">正在连接本机 OpenEagle…</p>
+</main><script type="module" src="popup.js"></script></body></html>
