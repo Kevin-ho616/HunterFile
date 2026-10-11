@@ -16,6 +16,13 @@ struct ContentView: View {
                         if store.similarityIDs != nil {
                             HStack { Label("相似度排序", systemImage: "photo.on.rectangle.angled"); Spacer(); Button("退出相似搜索") { store.similarityIDs = nil; store.scheduleRefresh() } }.font(.caption).padding(12).background(.tint.opacity(0.08))
                         }
+                        if !store.semanticMessage.isEmpty {
+                            HStack {
+                                Label(store.semanticMessage, systemImage: "sparkles")
+                                Spacer()
+                                if store.semanticImageVector != nil { Button("退出以图搜索") { store.semanticImageVector = nil; store.scheduleRefresh() } }
+                            }.font(.caption).padding(12).background(.tint.opacity(0.08))
+                        }
                         folderBrowserHeader
                         AssetBrowser(store: store)
                         statusBar
@@ -53,7 +60,11 @@ struct ContentView: View {
         .alert("操作未完成", isPresented: Binding(get: { store.error != nil }, set: { if !$0 { store.error = nil } })) {
             Button("好", role: .cancel) { store.error = nil }
         } message: { Text(store.error ?? "") }
-        .onChange(of: store.filter) { store.similarityIDs = nil; store.limit = 500; store.scheduleRefresh() }
+        .onChange(of: store.filter) {
+            store.similarityIDs = nil; store.limit = 500
+            if !store.filter.query.isEmpty { store.semanticImageTask?.cancel(); store.semanticImageVector = nil }
+            store.scheduleRefresh()
+        }
         .onChange(of: store.sort) { store.scheduleRefresh() }
         .onChange(of: store.layout) { UserDefaults.standard.set(store.layout, forKey: "layout") }
         .onChange(of: store.thumbnailSize) { UserDefaults.standard.set(store.thumbnailSize, forKey: "thumbnailSize") }
@@ -68,14 +79,19 @@ struct ContentView: View {
         HStack(spacing: 14) {
             VStack(alignment: .leading, spacing: 5) {
                 Text(store.title).font(.system(size: 23, weight: .semibold))
-                Text("\(store.total.formatted()) " + (store.filter.isEmpty ? "个素材" : "个匹配素材") + (store.selection.isEmpty ? "" : " · 已选 \(store.selection.count) 项")).font(.system(size: 12)).foregroundStyle(.secondary)
+                Text("\(store.total.formatted()) " + (store.filter.isEmpty && store.semanticImageVector == nil ? "个素材" : "个匹配素材") + (store.selection.isEmpty ? "" : " · 已选 \(store.selection.count) 项")).font(.system(size: 12)).foregroundStyle(.secondary)
             }
             Spacer(minLength: 12)
             HStack(spacing: 7) {
                 Image(systemName: "magnifyingglass").foregroundStyle(.secondary)
-                TextField("搜索名称、标签、备注…", text: $store.filter.query).textFieldStyle(.plain).focused($searchFocused)
+                TextField(store.semanticEnabled ? "描述画面或内容…" : "搜索名称、标签、备注…", text: $store.filter.query).textFieldStyle(.plain).focused($searchFocused)
                 if !store.filter.query.isEmpty { Button { store.filter.query = "" } label: { Image(systemName: "xmark.circle.fill").foregroundStyle(.secondary) }.buttonStyle(.plain) }
             }.padding(9).background(.quaternary.opacity(0.45), in: RoundedRectangle(cornerRadius: 8)).frame(minWidth: 170, maxWidth: 280)
+            Button {
+                if store.localModelPath.isEmpty { store.chooseLocalModel() } else { store.semanticEnabled.toggle() }
+            } label: { Image(systemName: "sparkles").foregroundStyle(store.semanticEnabled ? Color.accentColor : .secondary) }
+                .buttonStyle(.plain).help("启用或关闭本地 AI 搜索").accessibilityLabel("本地 AI 搜索")
+            if store.semanticEnabled { Button { store.chooseSemanticImage() } label: { Image(systemName: "photo.on.rectangle") }.buttonStyle(.plain).help("以图搜索素材").accessibilityLabel("以图搜索素材") }
             Button { store.showFilters.toggle() } label: { Image(systemName: "line.3.horizontal.decrease.circle" + (!store.filter.isEmpty ? ".fill" : "")) }.buttonStyle(.plain).font(.title3).help("筛选")
             Menu {
                 Picker("排序", selection: $store.sort) { ForEach(AssetSortOrder.allCases, id: \.self) { Text($0.title).tag($0) } }
@@ -145,6 +161,13 @@ struct ContentView: View {
                     Text(store.progressTitle).lineLimit(1)
                     Spacer()
                     Button("取消") { store.cancelJob() }.buttonStyle(.link)
+                }.font(.caption).padding(.horizontal, 18).padding(.vertical, 9)
+            } else if store.semanticIndexing {
+                HStack(spacing: 10) {
+                    ProgressView(value: store.semanticProgress).frame(width: 100)
+                    Text(store.semanticIndexTitle).lineLimit(1)
+                    Spacer()
+                    Button(store.semanticPaused ? "继续" : "暂停") { if store.semanticPaused { store.startSemanticIndex(resume: true) } else { store.pauseSemanticIndex() } }.buttonStyle(.link)
                 }.font(.caption).padding(.horizontal, 18).padding(.vertical, 9)
             } else {
                 HStack(spacing: 12) {

@@ -122,6 +122,14 @@ extension AppStore {
             let route = components?.path ?? path
             if method == "GET" && route == "/items" {
                 var filter = AssetFilter(); filter.query = components?.queryItems?.first { $0.name == "q" }?.value ?? ""
+                if components?.queryItems?.contains(where: { $0.name == "semantic" && $0.value == "1" }) == true {
+                    guard semanticEnabled, !filter.query.trimmed.isEmpty else { throw LibraryError.message("请启用本地 AI，并提供 q 查询。") }
+                    let vector = try await localEmbedding().query(filter.query)
+                    let result = try await repository.semanticResults(vector: vector, filter: filter)
+                    guard self.repository === repository else { throw LibraryError.message("资源库已切换，请重试。") }
+                    struct SemanticResult: Encodable { let total: Int; let items: [Asset]; let matches: [SemanticHit] }
+                    return (200, try JSONEncoder().encode(SemanticResult(total: result.assets.count, items: result.assets, matches: result.hits)))
+                }
                 let snapshot = try await repository.snapshot(filter: filter, limit: 500)
                 struct Result: Encodable { let total: Int; let items: [Asset] }
                 return (200, try JSONEncoder().encode(Result(total: snapshot.total, items: snapshot.assets)))

@@ -2,7 +2,7 @@ import SwiftUI
 import OpenEagleCore
 
 struct SettingsView: View {
-    var store: AppStore
+    @Bindable var store: AppStore
     @AppStorage("appearance") private var appearance = "system"
     @AppStorage("hoverPreview") private var hoverPreview = false
     @AppStorage("allowDuplicates") private var allowDuplicates = false
@@ -49,6 +49,24 @@ struct SettingsView: View {
                 }
             }.formStyle(.grouped).tabItem { Label("扩展", systemImage: "puzzlepiece.extension") }
             Form {
+                Section("本地 AI 搜索与分类") {
+                    Toggle("启用本地 AI", isOn: $store.semanticEnabled)
+                    HStack {
+                        Text(store.localModelPath.isEmpty ? "尚未选择模型" : URL(fileURLWithPath: store.localModelPath).lastPathComponent).lineLimit(1).truncationMode(.middle)
+                        Spacer(); Button("选择模型…") { store.chooseLocalModel() }
+                    }
+                    Link("下载 EmbeddingGemma 2 文字与视觉模型（约 388 MB）", destination: LocalEmbedding.modelURL)
+                    Text("下载后选择 .litertlm 文件。图片、视频画面和 PDF 在本机建立索引，不需要 API Key。首次建立索引后可重复使用。").font(.caption).foregroundStyle(.secondary)
+                    HStack {
+                        Text(store.semanticIndexTitle.isEmpty ? "已索引 \(store.semanticIndexed) 项" : store.semanticIndexTitle).font(.caption).lineLimit(2)
+                        Spacer()
+                        if store.semanticIndexing && !store.semanticPaused { Button("暂停") { store.pauseSemanticIndex() } }
+                        else { Button(store.semanticPaused ? "继续建立" : "更新索引") { store.startSemanticIndex(resume: true) }.disabled(!store.semanticEnabled || store.localModelPath.isEmpty) }
+                    }
+                    if store.semanticIndexing { ProgressView(value: store.semanticProgress) }
+                    Button("重新建立索引") { store.rebuildSemanticIndex() }.disabled(!store.semanticEnabled || store.localModelPath.isEmpty || store.semanticIndexing)
+                    if !store.semanticIndexErrors.isEmpty { ScrollView { Text(store.semanticIndexErrors.values.sorted().joined(separator: "\n")).font(.caption).foregroundStyle(.orange).textSelection(.enabled) }.frame(maxHeight: 80) }
+                }
                 Section("AI 整理") {
                     TextField("接口地址", text: $aiEndpoint, prompt: Text("https://…/v1/chat/completions"))
                     TextField("视觉模型名称", text: $aiModel)

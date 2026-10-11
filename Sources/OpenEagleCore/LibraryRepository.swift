@@ -52,7 +52,9 @@ public actor LibraryRepository {
                 "CREATE INDEX IF NOT EXISTS assets_kind ON assets(kind)",
                 "CREATE TABLE IF NOT EXISTS folders (id TEXT PRIMARY KEY, parent TEXT, name TEXT NOT NULL, data TEXT NOT NULL)",
                 "CREATE TABLE IF NOT EXISTS smart_folders (id TEXT PRIMARY KEY, data TEXT NOT NULL)",
-                "CREATE TABLE IF NOT EXISTS preferences (key TEXT PRIMARY KEY, data TEXT NOT NULL)"
+                "CREATE TABLE IF NOT EXISTS preferences (key TEXT PRIMARY KEY, data TEXT NOT NULL)",
+                "CREATE TABLE IF NOT EXISTS semantic_assets (asset TEXT PRIMARY KEY REFERENCES assets(id) ON DELETE CASCADE, fingerprint TEXT NOT NULL, version TEXT NOT NULL)",
+                "CREATE TABLE IF NOT EXISTS semantic_chunks (asset TEXT NOT NULL REFERENCES semantic_assets(asset) ON DELETE CASCADE, ordinal INTEGER NOT NULL, data TEXT NOT NULL, vector BLOB NOT NULL, PRIMARY KEY(asset, ordinal))"
             ] { try database.execute(sql) }
             guard try database.rows("PRAGMA quick_check").first?.values.first == "ok" else { throw LibraryError.message("资源库完整性检查失败，请使用备份。") }
             try fm.createDirectory(at: root.appendingPathComponent("assets"), withIntermediateDirectories: true)
@@ -143,6 +145,7 @@ public actor LibraryRepository {
             """, [asset.id, asset.name, asset.kind.rawValue, asset.ext, String(asset.byteCount), String(asset.width), String(asset.height),
                     String(asset.importedAt.timeIntervalSince1970), String(asset.modifiedAt.timeIntervalSince1970), String(asset.rating),
                     asset.favorite ? "1" : "0", asset.trashedAt.map { String($0.timeIntervalSince1970) }, asset.hash, asset.searchable, json])
+        try db.execute("DELETE FROM semantic_assets WHERE asset = ? AND fingerprint != ?", [asset.id, asset.semanticFingerprint])
     }
 
     public func importFile(_ source: URL, folderIDs: [String] = [], tags: [String] = [], sourceURL: String = "", allowDuplicate: Bool = false) throws -> ImportResult {

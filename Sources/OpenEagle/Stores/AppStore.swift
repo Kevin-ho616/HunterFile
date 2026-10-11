@@ -48,6 +48,32 @@ final class AppStore {
     var progressTitle = ""
     var activityErrors: [String] = []
     var similarityIDs: [String]?
+    var semanticEnabled = UserDefaults.standard.bool(forKey: "semanticEnabled") {
+        didSet {
+            UserDefaults.standard.set(semanticEnabled, forKey: "semanticEnabled")
+            if semanticEnabled { semanticPaused = false } else { pauseSemanticIndex(); semanticImageVector = nil }
+            scheduleRefresh()
+        }
+    }
+    var localModelPath = UserDefaults.standard.string(forKey: "localModelPath") ?? ""
+    var semanticHits: [String: SemanticHit] = [:]
+    var semanticMessage = ""
+    var semanticImageName = ""
+    var semanticIndexed = 0
+    var semanticIndexing = false
+    var semanticPaused = false
+    var semanticProgress: Double = 0
+    var semanticIndexTitle = ""
+    var semanticIndexErrors: [String: String] = [:]
+    @ObservationIgnored var semanticImageVector: [Float]?
+    @ObservationIgnored var semanticQueryCache: (String, [Float])?
+    @ObservationIgnored var embeddingEngine: LocalEmbedding?
+    @ObservationIgnored var embeddingLoadTask: Task<LocalEmbedding, Error>?
+    @ObservationIgnored var embeddingLoadID = UUID()
+    @ObservationIgnored var semanticIndexTask: Task<Void, Never>?
+    @ObservationIgnored var semanticImageTask: Task<Void, Never>?
+    @ObservationIgnored var semanticIndexID = UUID()
+    @ObservationIgnored var semanticFailures: [String: String] = [:]
     var lockedFolder: LibraryFolder?
     var refreshID = UUID()
     var undoStack: [[Asset]] = []
@@ -114,6 +140,7 @@ final class AppStore {
             let next = try LibraryRepository(url: url, create: create)
             let recovered = try await next.recoverInterruptedImports()
             refreshTask?.cancel(); watcherTask?.cancel()
+            resetSemanticIndex()
             repository = next
             if recovered > 0 { notice = "已恢复 \(recovered) 个中断导入的素材。" }
             selection = []; scope = .all; filter = .init(); similarityIDs = nil; limit = 500
@@ -132,15 +159,43 @@ final class AppStore {
         do {
             let snapshot = try await repository.snapshot(scope: currentScope, filter: currentFilter, sort: sort, limit: limit, includeSubfolders: currentIncludeSubfolders)
             guard !Task.isCancelled, self.repository === repository, currentScope == scope, currentFilter == filter, currentIncludeSubfolders == includeSubfolders else { return }
-            if let similarityIDs {
-                let found = try await repository.assets(ids: similarityIDs)
-                assets = found; total = found.count
-            } else { assets = snapshot.assets; total = snapshot.total }
+            var foundSemantic = false
+            semanticHits = [:]; semanticMessage = ""
+            if semanticEnabled, !currentFilter.query.trimmed.isEmpty || semanticImageVector != nil {
+                do {
+                    let vector: [Float]
+                    if let imageVector = semanticImageVector { vector = imageVector }
+                    else if let cached = semanticQueryCache, cached.0 == currentFilter.query { vector = cached.1 }
+                    else { vector = try await localEmbedding().query(currentFilter.query); semanticQueryCache = (currentFilter.query, vector) }
+                    let result = try await repository.semanticResults(vector: vector, scope: currentScope, filter: currentFilter, includeSubfolders: currentIncludeSubfolders, limit: limit)
+                    guard !Task.isCancelled, self.repository === repository, currentScope == scope, currentFilter == filter, currentIncludeSubfolders == includeSubfolders, semanticEnabled else { return }
+                    if !result.hits.isEmpty {
+                        assets = result.assets; total = assets.count
+                        semanticHits = Dictionary(uniqueKeysWithValues: result.hits.map { ($0.assetID, $0) })
+                        semanticMessage = semanticImageVector == nil ? (result.hits.contains(where: \.indexed) ? "本地 AI · 关键词与语义排序" : "索引尚未完成，使用关键词搜索") : "本地 AI · 以图搜索：\(semanticImageName)"
+                        foundSemantic = true
+                    } else { semanticMessage = "索引尚无匹配内容，使用关键词搜索" }
+                } catch is CancellationError { return }
+                catch { semanticMessage = "\(error.localizedDescription) 使用关键词搜索。" }
+            }
+            guard !Task.isCancelled, self.repository === repository, currentScope == scope, currentFilter == filter, currentIncludeSubfolders == includeSubfolders else { return }
+            if !foundSemantic {
+                if let similarityIDs {
+                    let found = try await repository.assets(ids: similarityIDs)
+                    assets = found; total = found.count
+                } else { assets = snapshot.assets; total = snapshot.total }
+            }
             folders = snapshot.folders; smartFolders = snapshot.smartFolders
             if case .folder(let id) = currentScope { lockedFolder = try await repository.lockedAncestor(of: id) } else { lockedFolder = nil }
             tags = snapshot.tags; counts = snapshot.counts; folderCounts = snapshot.folderCounts; totalBytes = snapshot.totalBytes
+            if !semanticIndexErrors.isEmpty {
+                let visible = Set(try await repository.assets(ids: Array(semanticIndexErrors.keys)).filter { $0.trashedAt == nil }.map(\.id))
+                guard !Task.isCancelled, self.repository === repository, currentScope == scope, currentFilter == filter else { return }
+                semanticIndexErrors = semanticIndexErrors.filter { visible.contains($0.key) }
+            }
             selection.formIntersection(Set(assets.map(\.id)))
             refreshID = UUID()
+            if semanticEnabled { startSemanticIndex() }
         } catch { if !Task.isCancelled { self.error = error.localizedDescription } }
     }
     func scheduleRefresh() {
@@ -150,6 +205,7 @@ final class AppStore {
     func navigate(_ scope: LibraryScope) {
         folderDropTargetID = nil
         self.scope = scope; selection = []; similarityIDs = nil; lockedFolder = nil; filter = .init(); limit = 500
+        semanticImageTask?.cancel(); semanticImageVector = nil; semanticHits = [:]
         scheduleRefresh()
     }
     func edit(ids: Set<String>? = nil, _ mutation: @escaping @Sendable (inout Asset) -> Void) {

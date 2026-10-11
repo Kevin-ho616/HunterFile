@@ -36,7 +36,7 @@ def request(path, body=None):
 
 
 TOOLS = [
-    {"name": "search_assets", "description": "搜索本机 OpenEagle 素材库，最多返回 500 个结果与总数。", "inputSchema": {"type": "object", "properties": {"query": {"type": "string"}}}},
+    {"name": "search_assets", "description": "搜索本机 OpenEagle 素材库，最多返回 500 项；semantic=true 使用已启用的本地 AI。", "inputSchema": {"type": "object", "properties": {"query": {"type": "string"}, "semantic": {"type": "boolean"}}}},
     {"name": "list_folders", "description": "列出当前资源库文件夹。", "inputSchema": {"type": "object", "properties": {}}},
     {"name": "collect_url", "description": "将 HTTP(S) 图片/文件直链或书签保存到 OpenEagle。", "inputSchema": {"type": "object", "properties": {"url": {"type": "string"}, "name": {"type": "string"}, "download": {"type": "boolean"}, "tags": {"type": "array", "items": {"type": "string"}}, "folderIDs": {"type": "array", "items": {"type": "string"}}}, "required": ["url"]}},
     {"name": "update_assets", "description": "更新所选 ID 的名称、备注、评分，或追加标签。", "inputSchema": {"type": "object", "properties": {"ids": {"type": "array", "items": {"type": "string"}}, "name": {"type": "string"}, "note": {"type": "string"}, "rating": {"type": "integer", "minimum": 0, "maximum": 5}, "tags": {"type": "array", "items": {"type": "string"}}}, "required": ["ids"]}},
@@ -47,7 +47,10 @@ TOOLS = [
 
 def call(name, arguments):
     if name == "search_assets":
-        return request("/items?" + urllib.parse.urlencode({"q": arguments.get("query", "")}))
+        query = {"q": arguments.get("query", "")}
+        if arguments.get("semantic") is True:
+            query["semantic"] = "1"
+        return request("/items?" + urllib.parse.urlencode(query))
     if name == "list_folders":
         return request("/folders")
     if name == "collect_url":

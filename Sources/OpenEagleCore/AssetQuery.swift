@@ -38,7 +38,7 @@ extension LibraryRepository {
         let (clause, values) = whereClause(scope: scope, filter: filter, folders: try allFolders(), smart: smart, includeSubfolders: includeSubfolders)
         return try db.rows("SELECT id FROM assets WHERE \(clause)", values).compactMap { $0["id"] }
     }
-    private func whereClause(scope: LibraryScope, filter: AssetFilter, folders: [LibraryFolder], smart: [SmartFolder], includeSubfolders: Bool) -> (String, [String?]) {
+    func whereClause(scope: LibraryScope, filter: AssetFilter, folders: [LibraryFolder], smart: [SmartFolder], includeSubfolders: Bool) -> (String, [String?]) {
         var clauses = [scope == .trash ? "trash IS NOT NULL" : "trash IS NULL"]
         var values: [String?] = []
         let visible = visibility(in: folders)

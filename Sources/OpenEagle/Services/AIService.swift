@@ -6,6 +6,9 @@ struct AISuggestion: Codable, Identifiable {
     var name: String
     var tags: [String]
     var note: String
+    var folderIDs: [String] = []
+    var candidateFolderIDs: [String] = []
+    var explanation = ""
 }
 
 enum AIService {

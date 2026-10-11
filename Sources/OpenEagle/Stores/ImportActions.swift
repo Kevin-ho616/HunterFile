@@ -103,6 +103,7 @@ extension AppStore {
         let analysis = await MediaService.shared.analyze(repository.fileURL(for: asset), kind: asset.kind, thumbnail: repository.thumbnailURL(for: asset))
         do { try await repository.updateAnalysis(id: asset.id, width: analysis.width, height: analysis.height, duration: analysis.duration, colors: analysis.colors) }
         catch { activityErrors.append("\(asset.name) 的预览信息：\(error.localizedDescription)") }
+        if self.repository === repository, semanticEnabled { startSemanticIndex() }
     }
     func pasteFromClipboard() {
         let board = NSPasteboard.general
@@ -235,6 +236,9 @@ extension AppStore {
         }
     }
     func findSimilar() {
+        if semanticEnabled, let asset = selectedAsset, asset.kind == .image, let repository {
+            searchSemanticImage(repository.thumbnailURL(for: asset), name: asset.name); return
+        }
         guard let asset = selectedAsset, let repository else { return }
         runJob("分析相似素材…") {
             let ids = try await repository.matchingIDs(scope: .kind(.image), filter: .init())

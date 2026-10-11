@@ -22,11 +22,16 @@ if pgrep -x "$APP_NAME" >/dev/null; then
     fi
 fi
 
-swift build -c "$CONFIGURATION"
+swift build -c "$CONFIGURATION" --product OpenEagle
 BUILD_BINARY="$(swift build -c "$CONFIGURATION" --show-bin-path)/OpenEagle"
-mkdir -p "$APP_BUNDLE/Contents/MacOS" "$APP_BUNDLE/Contents/Resources"
+mkdir -p "$APP_BUNDLE/Contents/MacOS" "$APP_BUNDLE/Contents/Resources" "$APP_BUNDLE/Contents/Frameworks"
 cp "$BUILD_BINARY" "$APP_BUNDLE/Contents/MacOS/$APP_NAME"
+cp -f "$(dirname "$BUILD_BINARY")/libCLiteRTLM_mac.dylib" "$APP_BUNDLE/Contents/Frameworks/"
+install_name_tool -add_rpath '@executable_path/../Frameworks' "$APP_BUNDLE/Contents/MacOS/$APP_NAME"
+codesign --force --sign - "$APP_BUNDLE/Contents/Frameworks/libCLiteRTLM_mac.dylib"
+ditto LICENSES "$APP_BUNDLE/Contents/Resources/LICENSES"
 cp docs/USER-GUIDE.md "$APP_BUNDLE/Contents/Resources/USER-GUIDE.md"
+cp docs/LOCAL-AI.md "$APP_BUNDLE/Contents/Resources/LOCAL-AI.md"
 cp docs/AUTOMATION.md "$APP_BUNDLE/Contents/Resources/AUTOMATION.md"
 cp script/openeagle.py "$APP_BUNDLE/Contents/Resources/openeagle.py"
 ditto browser-extension "$APP_BUNDLE/Contents/Resources/browser-extension"

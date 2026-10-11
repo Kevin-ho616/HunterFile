@@ -6,11 +6,14 @@
 | --- | --- | --- |
 | GET | /health | 无认证的应用/版本探测 |
 | GET | /items?q=关键词 | 最多 500 个素材与总数 |
+| GET | /items?q=中文描述&semantic=1 | 开启本地 AI 后按语义与关键词排序；最多 500 项，matches 提供页码、秒数、相关度及是否已有索引 |
 | GET | /folders | 文件夹列表 |
 | GET | /status | 忙碌状态、进度、最近错误 |
 | POST | /collect | 批量采集 HTTP(S) 文件直链、书签或 PNG data URL |
 | POST | /folders | 新建文件夹：name、可选 parentID |
 | POST | /items/update | ids 与可选 name、note、rating、tags；tags 追加合并 |
+
+CLI / MCP 的 `search_assets` 接受可选布尔参数 `semantic`：例如 `python3 script/openeagle.py search_assets '{"query":"出现猫的画面","semantic":true}'`。需先在应用中启用本地 AI、选择模型并建立索引；返回的相关度分数不是概率。
 
 `/collect` 示例：
 

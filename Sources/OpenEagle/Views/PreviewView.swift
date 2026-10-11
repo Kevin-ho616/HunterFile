@@ -87,7 +87,7 @@ struct PreviewView: View {
                         } else if asset.kind == .font {
                             FontPreview(url: repository.fileURL(for: asset))
                         } else if asset.ext == "pdf" {
-                            PDFPreview(url: repository.fileURL(for: asset))
+                            PDFPreview(url: repository.fileURL(for: asset), page: store.semanticHits[asset.id]?.page)
                         } else if asset.kind == .bookmark {
                             VStack(spacing: 22) {
                                 Image(systemName: "globe").font(.system(size: 65, weight: .ultraLight)).foregroundStyle(.tint)
@@ -101,7 +101,10 @@ struct PreviewView: View {
                 .task(id: asset.id) {
                     zoom = 1; pendingRect = nil; annotate = false; image = nil; player?.pause(); player = nil
                     if asset.kind == .image && asset.ext != "gif" { image = await ThumbnailCache.shared.image(at: repository.fileURL(for: asset)) }
-                    if asset.kind == .video || asset.kind == .audio { player = AVPlayer(url: repository.fileURL(for: asset)) }
+                    if asset.kind == .video || asset.kind == .audio {
+                        player = AVPlayer(url: repository.fileURL(for: asset))
+                        if let seconds = store.semanticHits[asset.id]?.seconds { await player?.seek(to: CMTime(seconds: seconds, preferredTimescale: 600)) }
+                    }
                 }
             }
             Divider()
@@ -223,8 +226,16 @@ struct NativePlayerView: NSViewRepresentable {
 
 private struct PDFPreview: NSViewRepresentable {
     var url: URL
+    var page: Int?
+    class Coordinator { var page: Int? }
+    func makeCoordinator() -> Coordinator { Coordinator() }
     func makeNSView(context: Context) -> PDFView { let view = PDFView(); view.autoScales = true; view.displayMode = .singlePageContinuous; return view }
-    func updateNSView(_ view: PDFView, context: Context) { if view.document?.documentURL != url { view.document = PDFDocument(url: url) } }
+    func updateNSView(_ view: PDFView, context: Context) {
+        let changed = view.document?.documentURL != url
+        if changed { view.document = PDFDocument(url: url) }
+        if changed || context.coordinator.page != page, let page, let target = view.document?.page(at: page - 1) { view.go(to: target) }
+        context.coordinator.page = page
+    }
 }
 
 private struct FontPreview: View {

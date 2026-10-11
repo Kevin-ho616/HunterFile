@@ -15,9 +15,13 @@ final class SQLite {
         try execute("PRAGMA foreign_keys = ON")
     }
     deinit { sqlite3_close(handle) }
-    func execute(_ sql: String, _ values: [String?] = []) throws {
+    func execute(_ sql: String, _ values: [String?] = [], blob: Data? = nil) throws {
         let statement = try prepare(sql, values)
         defer { sqlite3_finalize(statement) }
+        if let blob {
+            let status = blob.withUnsafeBytes { sqlite3_bind_blob(statement, Int32(values.count + 1), $0.baseAddress, Int32(blob.count), unsafeBitCast(-1, to: sqlite3_destructor_type.self)) }
+            guard status == SQLITE_OK else { throw error() }
+        }
         var result = sqlite3_step(statement)
         while result == SQLITE_ROW { result = sqlite3_step(statement) }
         guard result == SQLITE_DONE else { throw error() }
@@ -40,6 +44,22 @@ final class SQLite {
     }
     func scalar(_ sql: String, _ values: [String?] = []) throws -> Int {
         Int(try rows(sql, values).first?.values.first ?? "0") ?? 0
+    }
+    func forEachBlob(_ sql: String, _ values: [String?], _ visit: ([String: String], Data) throws -> Void) throws {
+        let statement = try prepare(sql, values)
+        defer { sqlite3_finalize(statement) }
+        var status = sqlite3_step(statement)
+        while status == SQLITE_ROW {
+            var row: [String: String] = [:], blob = Data()
+            for column in 0..<sqlite3_column_count(statement) {
+                if sqlite3_column_type(statement, column) == SQLITE_BLOB {
+                    if let bytes = sqlite3_column_blob(statement, column) { blob = Data(bytes: bytes, count: Int(sqlite3_column_bytes(statement, column))) }
+                } else if let text = sqlite3_column_text(statement, column) { row[String(cString: sqlite3_column_name(statement, column))] = String(cString: text) }
+            }
+            try visit(row, blob)
+            status = sqlite3_step(statement)
+        }
+        guard status == SQLITE_DONE else { throw error() }
     }
     func transaction<T>(_ operation: () throws -> T) throws -> T {
         try execute("BEGIN IMMEDIATE")

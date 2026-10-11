@@ -163,6 +163,7 @@ struct AssetBrowser: View {
                     HStack(spacing: 10) {
                         AssetThumbnail(asset: asset, root: store.repository?.root).frame(width: 36, height: 32)
                         Text(asset.name).lineLimit(1)
+                        if let location = store.semanticHits[asset.id]?.location, !location.isEmpty { Text(location).font(.caption).foregroundStyle(.secondary) }
                     }.contextMenu { AssetContextMenu(store: store, asset: asset) }
                 }.width(min: 180, ideal: 250)
                 TableColumn("类型") { Text($0.ext.uppercased()).font(.caption).foregroundStyle(.secondary) }.width(60)
@@ -254,6 +255,7 @@ struct AssetCard: View {
             }.frame(height: height).clipShape(RoundedRectangle(cornerRadius: 8)).overlay { RoundedRectangle(cornerRadius: 8).stroke(selected ? Color.accentColor : .clear, lineWidth: 2.5) }
             VStack(alignment: .leading, spacing: 4) {
                 Text(asset.name).font(.system(size: 12, weight: selected ? .semibold : .regular)).lineLimit(1).foregroundStyle(selected ? Color.accentColor : .primary)
+                if let location = store.semanticHits[asset.id]?.location, !location.isEmpty { Text(location).font(.system(size: 10)).foregroundStyle(.tint) }
                 HStack(spacing: 5) {
                     Text(asset.width > 0 ? asset.dimensions : ByteCountFormatter.string(fromByteCount: asset.byteCount, countStyle: .file)).font(.system(size: 10)).foregroundStyle(.tertiary)
                     Spacer(minLength: 2)
