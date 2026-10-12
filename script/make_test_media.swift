@@ -6,7 +6,7 @@ import PDFKit
 
 let root = URL(fileURLWithPath: CommandLine.arguments[1], isDirectory: true)
 try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
-let pdfURL = root.appendingPathComponent("OpenEagle PDF.pdf")
+let pdfURL = root.appendingPathComponent("HunterFiles PDF.pdf")
 var page = CGRect(x: 0, y: 0, width: 600, height: 420)
 let pdf = CGContext(pdfURL as CFURL, mediaBox: &page, nil)!
 pdf.beginPDFPage(nil)
@@ -14,14 +14,14 @@ NSGraphicsContext.saveGraphicsState()
 NSGraphicsContext.current = NSGraphicsContext(cgContext: pdf, flipped: false)
 NSColor(calibratedRed: 0.1, green: 0.2, blue: 0.6, alpha: 1).setFill()
 NSBezierPath(rect: CGRect(x: 0, y: 0, width: 600, height: 420)).fill()
-("OpenEagle PDF\nNative media verification" as NSString).draw(in: CGRect(x: 40, y: 170, width: 520, height: 150), withAttributes: [.font: NSFont.systemFont(ofSize: 32, weight: .semibold), .foregroundColor: NSColor.white])
+("HunterFiles PDF\nNative media verification" as NSString).draw(in: CGRect(x: 40, y: 170, width: 520, height: 150), withAttributes: [.font: NSFont.systemFont(ofSize: 32, weight: .semibold), .foregroundColor: NSColor.white])
 NSGraphicsContext.restoreGraphicsState()
 pdf.endPDFPage(); pdf.closePDF()
-assert(PDFDocument(url: pdfURL)?.string?.contains("OpenEagle PDF") == true)
+assert(PDFDocument(url: pdfURL)?.string?.contains("HunterFiles PDF") == true)
 
 let rate = 48_000.0
 let format = AVAudioFormat(standardFormatWithSampleRate: rate, channels: 1)!
-let audioURL = root.appendingPathComponent("OpenEagle Audio.wav")
+let audioURL = root.appendingPathComponent("HunterFiles Audio.wav")
 do {
     let audio = try AVAudioFile(forWriting: audioURL, settings: format.settings)
     let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: 96_000)!
@@ -32,7 +32,7 @@ do {
 let audioDuration = try await AVURLAsset(url: audioURL).load(.duration).seconds
 assert(audioDuration > 1.9)
 
-let videoURL = root.appendingPathComponent("OpenEagle Video.mov")
+let videoURL = root.appendingPathComponent("HunterFiles Video.mov")
 if FileManager.default.fileExists(atPath: videoURL.path) { try FileManager.default.removeItem(at: videoURL) }
 let writer = try AVAssetWriter(outputURL: videoURL, fileType: .mov)
 let input = AVAssetWriterInput(mediaType: .video, outputSettings: [AVVideoCodecKey: AVVideoCodecType.h264, AVVideoWidthKey: 320, AVVideoHeightKey: 180])

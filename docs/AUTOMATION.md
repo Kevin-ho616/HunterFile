@@ -6,11 +6,14 @@
 | --- | --- | --- |
 | GET | /health | 无认证的应用/版本探测 |
 | GET | /items?q=关键词 | 最多 500 个素材与总数 |
+| GET | /items?q=中文描述&semantic=1 | 开启本地 AI 后按语义与关键词排序；最多 500 项，matches 提供页码、秒数、相关度及是否已有索引 |
 | GET | /folders | 文件夹列表 |
 | GET | /status | 忙碌状态、进度、最近错误 |
 | POST | /collect | 批量采集 HTTP(S) 文件直链、书签或 PNG data URL |
 | POST | /folders | 新建文件夹：name、可选 parentID |
 | POST | /items/update | ids 与可选 name、note、rating、tags；tags 追加合并 |
+
+CLI / MCP 的 `search_assets` 接受可选布尔参数 `semantic`：例如 `python3 script/hunterfiles.py search_assets '{"query":"出现猫的画面","semantic":true}'`。需先在应用中启用本地 AI、选择模型并建立索引；返回的相关度分数不是概率。
 
 `/collect` 示例：
 
@@ -26,18 +29,20 @@
 
 ## Python CLI
 
-仅使用 Python 3 标准库。默认从 macOS 钥匙串读取 OpenEagle 的令牌，也可通过环境变量 `OPENEAGLE_TOKEN` 注入。不会打印令牌。
+仅使用 Python 3 标准库。默认从 macOS 钥匙串读取 HunterFiles 的令牌，也可通过环境变量 `HUNTERFILES_TOKEN` 注入。不会打印令牌。
+
+原 `script/hunterfile.py` / `script/openeagle.py`、`HUNTERFILE_TOKEN` / `OPENEAGLE_TOKEN` 和旧钥匙串服务名继续兼容。按 `HUNTERFILES_TOKEN` → `HUNTERFILE_TOKEN` → `OPENEAGLE_TOKEN` 取首个非空值，原有令牌无需重新生成。
 
 ```sh
-python3 script/openeagle.py search_assets '{"query":"海报"}'
-python3 script/openeagle.py list_folders
-python3 script/openeagle.py collect_url '{"url":"https://en.eagle.cool/","download":false,"tags":["工具"]}'
+python3 script/hunterfiles.py search_assets '{"query":"海报"}'
+python3 script/hunterfiles.py list_folders
+python3 script/hunterfiles.py collect_url '{"url":"https://en.eagle.cool/","download":false,"tags":["工具"]}'
 ```
 
 ## MCP stdio
 
 ```sh
-python3 /absolute/path/OpenEagle/script/openeagle.py --mcp
+python3 /absolute/path/HunterFiles/script/hunterfiles.py --mcp
 ```
 
 提供 `search_assets`、`list_folders`、`collect_url`、`update_assets`、`create_folder`、`get_status` 六个工具。支持 JSON-RPC 初始化、ping、tools/list 和 tools/call，采用每行一个 JSON 的 stdio 传输。可配置到支持 stdio MCP 的客户端；项目不会自动修改用户的全局 MCP 配置。
@@ -51,5 +56,7 @@ python3 /absolute/path/OpenEagle/script/openeagle.py --mcp
 ```
 
 插件运行于隔离的 WKWebView，原生桥仅接受插件主页面的请求，并提供 `getSelection()`、`getLibrary()`、`saveText(name,text)`。文件写入通过用户选择的保存面板进行。内置示例是素材统计与 CSV 清单导出。
+
+新插件使用 `window.hunterfiles`；`window.hunterfile` / `window.openeagle` 保留为同一对象的兼容别名。
 
 这不是 Eagle 官方 API 的二进制或协议替代品；第三方客户端需要按上述接口适配。

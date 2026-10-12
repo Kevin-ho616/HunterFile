@@ -1,6 +1,6 @@
 chrome.runtime.onInstalled.addListener(() => {
-  chrome.contextMenus.create({ id: 'image', title: '保存图片到 OpenEagle', contexts: ['image'] });
-  chrome.contextMenus.create({ id: 'bookmark', title: '保存书签到 OpenEagle', contexts: ['page', 'link'] });
+  chrome.contextMenus.create({ id: 'image', title: '保存图片到 HunterFiles', contexts: ['image'] });
+  chrome.contextMenus.create({ id: 'bookmark', title: '保存书签到 HunterFiles', contexts: ['page', 'link'] });
 });
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   try {

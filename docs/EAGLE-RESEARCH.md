@@ -1,4 +1,4 @@
-# Eagle 功能研究与 OpenEagle 开发契约
+# Eagle 功能研究与 HunterFiles 开发契约
 
 研究日期：2026-09-06。来源：官方公开资料与本机 Eagle 界面观察；独立实现，不使用 Eagle 私有代码、图标或品牌素材。
 
@@ -24,7 +24,7 @@ Eagle 是本地素材管理器。资源库拥有原始文件、缩略图和分�
 
 macOS 14+；SwiftPM；SwiftUI 场景/菜单/侧栏/设置；AppKit 文件面板与桌面交互；ImageIO / Quick Look / PDFKit / AVKit / CoreText / Vision；SQLite + CryptoKit；无第三方运行依赖。
 
-核心模块 `OpenEagleCore` 负责值模型、查询与资源库事务；应用模块分为 App、Views、Stores、Services、Support。文件处理与查询在 actor 上串行执行，界面在主线程；缩略图按需生成、缓存。库的相对路径不得逃逸资源库；导入先复制到暂存区，完成后原子移动并提交索引；失败不影响源文件。首次启动不读取或迁移现有私人资源库。
+核心模块 `HunterFilesCore` 负责值模型、查询与资源库事务；应用模块分为 App、Views、Stores、Services、Support。文件处理与查询在 actor 上串行执行，界面在主线程；缩略图按需生成、缓存。库的相对路径不得逃逸资源库；导入先复制到暂存区，完成后原子移动并提交索引；失败不影响源文件。首次启动不读取或迁移现有私人资源库。
 
 ## 核验
 
