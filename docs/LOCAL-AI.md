@@ -1,6 +1,6 @@
 # 本地多模态 AI
 
-第一版使用 EmbeddingGemma 2 文字与视觉 440M，图片、视频和文档均在本机处理。向量提供检索与分类排序；生成名称、摘要与问答需要另行接入生成模型。
+HunterFile 使用 EmbeddingGemma 2 文字与视觉 440M 做检索与分类排序，Gemma 4 E2B 生成名称、摘要与基于素材的问答。图片、视频与文档均在本机处理；两种模型用途不同，需要分别下载和选择。
 
 ## 使用
 
@@ -8,6 +8,11 @@
 2. 开启本地 AI，等待后台索引。设置中可暂停、继续、查看失败项或重建索引。处理失败的素材保留原件，仍可通过名称等关键词找到；点击更新会重试失败项。
 3. 在搜索框描述画面、主题或文档内容；也可点击图片按钮选择参考图。相关 PDF 页码和视频时刻显示在结果上，预览会自动定位。
 4. 选中素材 → AI 整理 → 本地分类 → 生成建议。确认标签和文件夹后应用；可撤销、重做。名称、备注与原件保留。
+5. 整理 → 新建智能文件夹 → 勾选“按语义描述收集素材”。输入描述并设定相关度门槛，可叠加原有筛选规则。门槛越高收集越严格，分数不是概率；只显示已索引且可访问的匹配素材。模型不可用或关闭时显示空结果与提示，不退回整个库。
+6. 设置 → AI → 下载 Gemma 4 E2B（2,588,147,712 字节）→ 选择生成模型。选中素材 → AI 整理 → 本地生成，预览并编辑名称、AI 摘要，逐项勾选后应用。默认仅保存独立的 AI 摘要；勾选“应用名称”才覆盖显示名称。人工备注与磁盘原件不变，可撤销与重做。
+7. 素材菜单 → 素材问答，输入问题。检索保留当前范围、类型和其他筛选条件，使用最多 5 份素材与 3 幅画面回答。点击编号来源可预览对应 PDF 页或视频时刻；没有证据则提示不足。
+
+本地生成模型在第一次使用时校验并加载，设置页可释放其内存。所有建议在应用前再次检查素材是否已改变、删除或锁定；过期建议需要重新生成。
 
 模型可存放在用户选定的目录；移动模型后需要重新选择。索引随 `.openeagle` 的 SQLite 数据库与完整备份保存，重启后复用；素材包导入使用新标识，会重新索引。升级模型或预处理版本会重新建立对应索引。
 
@@ -18,7 +23,9 @@
 - 视频：覆盖整个时长，每 5 秒抽一帧，记录实际帧时间。短于采样间隔的镜头可能遗漏；不识别对白或声音。
 - 文档：支持 UTF-8 文本，以及系统可读取的 RTF、DOC、DOCX。其他格式会显示失败状态；音频、字体和书签目前只索引已有文字元数据。
 - 关键词直接命中优先，其他结果按同一素材的最佳片段相似度排列；查询保留类型、标签、尺寸、日期、评分、文件夹及子文件夹筛选。锁定素材在索引、检索与分类候选中排除；已索引的回收站素材只在回收站范围出现。
-- 返回最相关的前 500 项；排序分数不是概率，也不代表每个结果都相关。当前智能文件夹仍使用原有关键词规则。
+- 默认加载最相关的前 500 项，可继续加载；检索结果上限为 100,000 项。排序分数不是概率，也不代表每个结果都相关。语义智能文件夹按素材最佳片段与文件夹描述的相似度判定归属，文件夹内搜索单独对已归属素材排序；旧关键词智能文件夹继续工作。
+
+摘要最多使用 12 段文字摘录与 3 幅代表画面，保存时注明覆盖范围；长文档与视频的摘要不代表全文或所有镜头。问答只使用检索命中的片段和对应画面，不转写音频，也不执行素材中的指令。引用编号由应用验证，答案仍需用原素材核对。AI 摘要不作为下一轮索引或问答的原始证据，避免生成内容反复作为来源。
 
 向量以 768 维 Float32 BLOB 保存，不把不同模型或维度混用。原始文件不变；内容元数据变化时，使对应索引失效并重建，收藏与浏览记录变化不触发重建。取消时保留已完成素材的索引，正在处理的素材下一次重新处理。精确扫描随片段数量线性增加，大库的耗时还需要实测。
 
@@ -26,17 +33,30 @@
 
 ```sh
 swift script/make_ai_test_media.swift test-output/ai-fixtures
-swift run OpenEagleAIBenchmark /absolute/path/model.litertlm test-output/ai-fixtures cpu test-output/ai-benchmark-cpu.json
-swift run OpenEagleAIBenchmark /absolute/path/model.litertlm test-output/ai-fixtures gpu test-output/ai-benchmark-gpu.json
+swift run HunterFileAIBenchmark /absolute/path/model.litertlm test-output/ai-fixtures cpu test-output/ai-benchmark-cpu.json
+swift run HunterFileAIBenchmark /absolute/path/model.litertlm test-output/ai-fixtures gpu test-output/ai-benchmark-gpu.json
 swift test --filter Semantic
 OPENEAGLE_TEST_MODEL=/absolute/path/model.litertlm swift test --filter LocalAIIntegrationTests
+HUNTERFILE_TEST_GENERATION_MODEL=/absolute/path/gemma-4-E2B-it.litertlm swift test --filter GenerationIntegrationTests
+OPENEAGLE_TEST_MODEL=/absolute/path/embeddinggemma-2-text-vision-440m.litertlm HUNTERFILE_TEST_GENERATION_MODEL=/absolute/path/gemma-4-E2B-it.litertlm swift test --filter GenerationStoreIntegrationTests
 ```
 
 测试答案在生成脚本中预先指定，共 12 张中文主题海报、12 份两页 PDF、1 段含 12 个主题画面的 72 秒视频及 50 条中文查询。视频只有一个文件，因此必须检查匹配时间段；文档同时检查匹配页码。报告保存逐条结果、排名、定位、延迟、模型修订和校验值。模型与生成素材不提交到 Git。
 
 真实模型集成测试另外验证了 6 个文件的 AppStore 后台索引：暂停后保留 1 个已完成文件，继续后完成全部；PDF 检索定位第 2 页，视频检索定位猫出现的 0:50；扫描 PDF 成功 OCR；分类推荐海洋标签与文件夹，并通过现有编辑流程应用。无模型环境变量时，此测试跳过，普通测试不要求下载权重。
 
-独立 OpenEagleQA 应用的实际界面检查使用 4 个受控文件，验证了模型选择、中文检索、PDF 第 2 页预览、视频 0:50 定位、以图排序、分类预览与应用、撤销及设置页的完成状态；没有修改正式应用或个人资源库。重复打包和嵌入运行库的签名校验也已通过。
+第一轮独立 QA 应用的界面检查使用 4 个受控文件，验证了模型选择、中文检索、PDF 第 2 页预览、视频 0:50 定位、以图排序、分类预览与应用、撤销及设置页的完成状态；没有修改正式应用或个人资源库。
+
+2026-10-12 的 HunterFileQA 界面检查沿用独立的 4 文件测试库：创建语义智能文件夹，从 0.60 调至 0.75 后范围收窄；关闭本地 AI 后显示空结果与启用提示。四项名称与摘要生成完成，取消勾选三项后仅应用一张图片，原名称保留，撤销后 AI 摘要消失；最终多行摘要框可实际编辑。问答来源链接分别打开 PDF 第 2 页与视频 0:50 的猫画面。设置页成功释放生成模型，模型路径保留。两种应用包与内嵌运行库均通过签名验证。
+
+真实生成回归分别运行，避免与原生窗口事件测试同时占用主线程：
+
+| 检查 | 本机结果 |
+| --- | --- |
+| 原生生成运行库：文字、图片、系统指令、取消后再生成 | 通过；测试函数 7.06 秒，进程峰值常驻内存 2.65 GB |
+| 混合图库：三项名称与摘要、语义文件夹、勾选应用、撤销重做、PDF 与视频问答、无资料提示 | 通过；最终测试函数 45.38 秒，进程峰值常驻内存 4.26 GB |
+
+时间与内存是这一组受控测试的测量，含模型加载与检索，不能当作每个文件的生成速度或真实图库准确率。
 
 本机结果（2026-10-12，M5 Pro / 24 GiB，macOS 27.0.1，已有系统和 SDK 缓存）：
 
@@ -59,4 +79,7 @@ OPENEAGLE_TEST_MODEL=/absolute/path/model.litertlm swift test --filter LocalAIIn
 - 运行库：[Google LiteRT-LM v0.18.0](https://github.com/google-ai-edge/LiteRT-LM/tree/v0.18.0)。SwiftPM 校验 macOS 发布包，通过原生 C API 调用；无 Python 运行时或外部模型服务器。构建应用会嵌入并签名动态库。
 - 上游能力说明：[Google 发布说明](https://blog.google/innovation-and-ai/technology/developers-tools/embeddinggemma-2/)、[官方模型卡](https://huggingface.co/google/embeddinggemma-2)。
 
-后续评估：个人混合图库、短镜头抽取、语义智能文件夹与本地生成模型。它们不包含在本轮已验证功能中。
+- 生成模型：[Gemma 4 E2B LiteRT-LM](https://huggingface.co/litert-community/gemma-4-E2B-it-litert-lm)，修订 `b3ca0d2f076785a8f4b2219ddbd2bdb99954eae1`。
+- 生成模型 SHA-256：`181938105e0eefd105961417e8da75903eacda102c4fce9ce90f50b97139a63c`。
+
+后续评估：个人混合图库、短镜头抽取、长资料覆盖和大规模索引。受控测试不代表真实图库的搜索或生成准确率。

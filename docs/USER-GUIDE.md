@@ -1,6 +1,6 @@
-# OpenEagle 使用说明
+# HunterFile 使用说明
 
-OpenEagle 是原生 macOS 素材管理器。首次启动会在 `~/Pictures/OpenEagle/我的资源库.openeagle` 建立独立资源库。可以在左上角菜单新建或切换资源库，也可以体验内置的独立示例库。
+HunterFile 是原生 macOS 素材管理器。首次启动会在 `~/Pictures/HunterFile/我的资源库.openeagle` 建立独立资源库。可以在左上角菜单新建或切换资源库，也可以体验内置的独立示例库。
 
 ## 日常使用
 
@@ -28,7 +28,7 @@ OpenEagle 是原生 macOS 素材管理器。首次启动会在 `~/Pictures/OpenE
 - Eagle 的私有插件、智能文件夹内部规则、密码状态和时间轴标注不会在迁移时转换。缺失文件会逐项记录；请看任务记录。
 - 使用“备份完整资源库”生成一致的可重开备份。关闭应用后可用外置盘或同步工具复制整个资源库。**不支持多设备同时写同一个库**。
 - 外置磁盘离线、数据库缺失或损坏会报错，应用不会用空数据库替换已有素材。
-- 素材包保存原件、文件夹层级、标签、评分、备注与图片标注；可通过“导入素材”选择整个 `.openeaglepack` 包导入其他资源库。它是 OpenEagle 自身格式，不兼容 Eagle 官方素材包；分享时不会复制文件夹密码。
+- 素材包保存原件、文件夹层级、标签、评分、备注与图片标注；可通过“导入素材”选择整个 `.openeaglepack` 包导入其他资源库。它是 HunterFile 自身格式，不兼容 Eagle 官方素材包；分享时不会复制文件夹密码。
 
 ## 文件夹保护
 
@@ -38,7 +38,7 @@ OpenEagle 是原生 macOS 素材管理器。首次启动会在 `~/Pictures/OpenE
 
 ## 浏览器采集
 
-1. OpenEagle → 设置 → 扩展 → 启用本地采集 API。
+1. HunterFile → 设置 → 扩展 → 启用本地采集 API。
 2. 点击“复制采集令牌”。
 3. 打开扩展文件夹，在 Chrome / Edge 扩展管理页启用开发者模式，选择“加载已解压的扩展”。
 4. 在扩展设置粘贴令牌并测试连接。
@@ -56,7 +56,10 @@ OpenEagle 是原生 macOS 素材管理器。首次启动会在 `~/Pictures/OpenE
 - “AI 整理 → 本地分类”根据已有标签、文件夹说明和示例素材提出候选，标签可编辑，文件夹可取消勾选；应用只追加分类，保留名称与备注，支持 ⌘Z / ⇧⌘Z。候选相似度不是概率，需要人工判断。
 - 设置 → AI 中填写兼容 Chat Completions 的**完整视觉接口地址**、模型名和 API Key。密钥保存在 macOS 钥匙串。
 - “AI 整理 → 接口生成”只有点击生成后才发送所选素材的缩略图和名称。建议可预览、修改，再应用；支持名称、标签、备注。
-- 本地 EmbeddingGemma 2 只生成向量，不生成名称或摘要。本地模型由用户下载，项目不附带付费模型服务。支持格式、抽帧限制和受控评测见 [本地 AI](LOCAL-AI.md)。当前智能文件夹仍保存关键词和筛选条件。
+- 智能文件夹可勾选“按语义描述收集素材”，输入主题并设定相关度门槛，同时保留类型、标签等规则。语义归属只来自已索引素材；关闭本地 AI 时需要重新启用才能查看。
+- 设置 → AI → 下载并选择 Gemma 4 E2B 生成模型。“AI 整理 → 本地生成”逐项预览名称和 AI 摘要，勾选要应用的素材；默认保留原名称，只有勾选“应用名称”才覆盖显示名称。AI 摘要独立保存，人工备注保留；支持撤销、重做。
+- 素材菜单 → 素材问答，依据当前范围的检索片段与画面在本机回答，点击来源核对 PDF 页码或视频时刻。长文档与视频仅作抽样分析，音频未转写，证据不足会提示。
+- 两种本地模型均由用户下载，项目不附带付费模型服务。支持格式、覆盖限制和受控评测见 [本地 AI](LOCAL-AI.md)。
 
 ## 自动导入与插件
 
@@ -65,12 +68,12 @@ OpenEagle 是原生 macOS 素材管理器。首次启动会在 `~/Pictures/OpenE
 设置 → 扩展可打开内置“素材统计与清单导出”插件，或打开包含 `plugin.json` 的本地 HTML 插件。插件 API：
 
 ```javascript
-const assets = await openeagle.getSelection();
-const library = await openeagle.getLibrary();
-await openeagle.saveText('notes.txt', '由用户选择保存位置');
+const assets = await hunterfile.getSelection();
+const library = await hunterfile.getLibrary();
+await hunterfile.saveText('notes.txt', '由用户选择保存位置');
 ```
 
-插件接口是 OpenEagle 自身协议，并非 Eagle 的 Node.js/HTML 插件 API。只加载你信任的插件。
+插件接口是 HunterFile 自身协议，并非 Eagle 的 Node.js/HTML 插件 API。只加载你信任的插件。
 
 ## 快捷键
 

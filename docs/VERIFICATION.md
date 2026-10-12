@@ -1,6 +1,6 @@
-# OpenEagle 验收记录
+# HunterFile 验收记录
 
-日期：2026-09-12。验证环境：本机 Apple Silicon、macOS 26.6.2、Swift 6.3.3。源码最低目标 macOS 14；未在 macOS 14 或 Intel 实机测试。无第三方运行库。
+以下为 2026-09-12 的历史验收，当时产品名为 OpenEagle。验证环境：本机 Apple Silicon、macOS 26.6.2、Swift 6.3.3。源码最低目标 macOS 14；未在 macOS 14 或 Intel 实机测试。当时无第三方运行库；当前本地 AI 构建内嵌 Google LiteRT-LM，最新记录见下文与 [本地 AI](LOCAL-AI.md)。
 
 ## 可重复运行的检查
 
@@ -17,11 +17,11 @@ swift test
 
 ```sh
 ./script/build_and_run.sh --qa
-# 在 OpenEagleQA 的设置中启用本地 API，再执行：
+# 在 HunterFileQA 的设置中启用本地 API，再执行：
 python3 script/verify_api.py
 ```
 
-该脚本先核对监听进程确实为 `OpenEagleQA`，才允许写入测试素材。实测通过：401 认证拒绝、文件夹创建、PNG 截图、带缩略图的书签、非法评分回滚、元数据更新与含空格搜索、本地路径拒绝、CLI 绕过系统网页代理、MCP 初始化/工具列表/真实搜索。令牌不写入测试报告。
+该脚本先核对监听进程确实为 `HunterFileQA`，才允许写入测试素材。改名前版本实测通过：401 认证拒绝、文件夹创建、PNG 截图、带缩略图的书签、非法评分回滚、元数据更新与含空格搜索、本地路径拒绝、CLI 绕过系统网页代理、MCP 初始化/工具列表/真实搜索。令牌不写入测试报告。
 
 ## 本机原生界面实测
 
@@ -62,13 +62,13 @@ swift script/make_test_media.swift "$PWD/test-output/Media Fixtures"
 
 ## 数据边界
 
-测试库位于项目 `test-output/`。示例库位于 `~/Pictures/OpenEagle/示例素材库.openeagle`，由应用单独生成。没有对现有 Eagle 私人资源库做整库迁移、覆盖或删除。
+测试库位于项目 `test-output/`。历史示例库位于 `~/Pictures/OpenEagle/示例素材库.openeagle`，由应用单独生成。没有对现有 Eagle 私人资源库做整库迁移、覆盖或删除。
 
 迁移测试验证的是构造的 Eagle 元数据/原件样本，不能代替对所有历史 Eagle 版本的兼容性测试。应用逐项报告无法迁移的文件。原件导入与素材包往返测试比较了 SHA-256；显示名称和注释修改不会改写原始文件。
 
 ## 安装与打包
 
-优化构建已安装到 `~/Applications/OpenEagle.app`，并从安装位置打开、确认资源库读取正常。应用约 6 MB，签名验证 `codesign --verify --deep --strict` 与 Info.plist 校验通过。侧栏“字体”已按反馈替换为独立的书本图标，普通文件夹支持从内置图标库选择图标。
+当时的优化构建已安装到 `~/Applications/OpenEagle.app`，并从安装位置打开、确认资源库读取正常。应用约 6 MB，签名验证 `codesign --verify --deep --strict` 与 Info.plist 校验通过。侧栏“字体”已按反馈替换为独立的书本图标，普通文件夹支持从内置图标库选择图标。
 
 ## 尚未完成的外部验证与功能差异
 
@@ -79,3 +79,16 @@ swift script/make_test_media.swift "$PWD/test-output/Media Fixtures"
 - 不兼容 Eagle 官方 Marketplace 插件或官方 eaglepack 协议；没有完整云端语义模型、Pinterest 联动、音频 BPM、AI 擦除/超分/背景移除、团队协同与同步冲突合并。
 - 文件夹密码用于应用内访问保护，原件没有加密。
 - 发布物为本机 Apple Silicon 构建与 ad-hoc 签名；没有 Developer ID 签名和 Apple 公证，未声称面向任意外部 Mac 的发行验证已完成。
+
+## 2026-10-12：HunterFile 改名与本地 AI
+
+项目、Swift 模块、可执行文件、应用包、扩展、插件入口、CLI 和当前使用文档统一使用 HunterFile。GitHub 仓库已改为 `Kevin-ho616/HunterFile`，本地远程地址已更新。旧资源库格式、素材包标记、钥匙串服务与 CLI/插件别名保留；偏好迁移只填充新域缺失的设置，并隔离正式与 QA 配置。
+
+- `swift test`：45 项常规检查通过；3 项需要真实模型的测试默认跳过，随后分别启用并通过。新增检查覆盖语义文件夹独立归属与查询排序、叠加规则、分页总数、锁定隔离、旧数据解码、过期建议与批量原子校验、独立 AI 摘要、名称保留、撤销重做、生成 JSON/引用验证及偏好迁移。
+- 真实 EmbeddingGemma 2：6 文件索引暂停后保留 1 项，继续完成全部；扫描 PDF OCR、图片/PDF/视频检索定位和分类应用通过。
+- 真实 Gemma 4 E2B：文字与图片生成、系统消息、取消恢复通过；混合图库名称/摘要、逐项应用与撤销重做、语义文件夹、带页码与时刻的问答通过。具体环境、覆盖范围和测量见 [本地 AI](LOCAL-AI.md)。
+- HunterFileQA 原生界面：语义文件夹门槛更新与关闭 AI 时的空结果、四素材建议预览、仅应用勾选项及撤销、多行摘要实际编辑、问答来源打开 PDF 第 2 页及视频 0:50 画面、生成模型释放均通过。
+- `python3 script/verify_api.py`：改名后的独立 QA 库通过认证拒绝、创建分类、截图/书签、非法评分回滚、元数据更新、路径拒绝、CLI 代理绕过与 MCP 真实搜索。两个 CLI 文件另通过初始化和工具列表检查；脚本语法与文档文件链接通过。验证结束关闭 QA 本地 API。
+- `dist/HunterFile.app` 与 `dist/HunterFileQA.app`：构建成功，Info.plist 名称/标识、运行库嵌入、使用说明与兼容入口完整；`codesign --verify --deep --strict` 通过。没有替换 `~/Applications/OpenEagle.app` 或对个人资源库写入。
+
+未测试个人混合图库、大规模或长资料效果、Intel/macOS 14 实机、Developer ID 签名与公证。视频摘要与问答使用采样画面，没有音频转写；生成内容需要人工核对。
