@@ -1,16 +1,18 @@
-# HunterFile
+# HunterFiles
 
-**一款本地优先的 macOS 素材管理器。** 把散落在文件夹、剪贴板和网页里的图片与其他文件收进资源库，用文件夹、标签、评分和搜索整理，再随时预览、导出或迁移。
+<p align="center"><img src="assets/branding/hunterfiles-app-icon.png" width="128" alt="HunterFiles H 应用图标"></p>
 
-HunterFile 使用 SwiftUI / AppKit 构建，资源库保存在本机，应用内嵌 Google LiteRT-LM 运行库，本地 AI 权重由用户下载。项目独立实现，与 Eagle 官方无关联。
+**用本地 AI 搜索和整理图片、视频与文档。** HunterFiles 是一款 macOS 素材管理器，把文件、剪贴板和网页里的素材收进本机资源库，用自然语言检索、文件夹、标签和评分整理，再随时预览、导出或迁移。
 
-![HunterFile 素材总览：网格视图、文件夹和分类导航](docs/screenshots/openeagle-grid.jpg)
+HunterFiles 使用 SwiftUI / AppKit 构建，资源库保存在本机，应用内嵌 Google LiteRT-LM 运行库，本地 AI 权重由用户下载。项目独立实现，与 Eagle 官方无关联。
 
-> 界面截图来自改名前版本的 `ReadmeDemo` 演示资源库；其中的图片均为原创示例素材，不含个人文件。当前产品名为 HunterFile。
+![HunterFiles 图片网格：H 图标、AI 搜索开关与分类导航](docs/screenshots/hunterfiles-grid.jpg)
+
+> 界面截图来自当前 HunterFiles 的独立 `HunterFilesReadme` 演示库，素材为原创受控测试样本，不含个人文件。
 
 | 素材属性与分类 | 主窗口内预览 |
 | --- | --- |
-| [![选中素材后，可编辑名称、备注、评分、标签和所属文件夹](docs/screenshots/openeagle-detail.jpg)](docs/screenshots/openeagle-detail.jpg) | [![图片预览保留左侧导航与右侧属性面板](docs/screenshots/openeagle-preview.jpg)](docs/screenshots/openeagle-preview.jpg) |
+| [![选中素材后，可编辑名称、备注、评分、标签和所属文件夹](docs/screenshots/hunterfiles-detail.jpg)](docs/screenshots/hunterfiles-detail.jpg) | [![图片预览保留左侧导航与右侧属性面板](docs/screenshots/hunterfiles-preview.jpg)](docs/screenshots/hunterfiles-preview.jpg) |
 
 ## 功能
 
@@ -19,7 +21,7 @@ HunterFile 使用 SwiftUI / AppKit 构建，资源库保存在本机，应用内
 - **文件与目录导入**：按 `⌘I` 选择文件或文件夹，也可以从 Finder 拖入。导入时复制原件，源文件仍留在原处；目录层级可转换为资源库里的逻辑文件夹。
 - **重复内容识别**：按文件内容识别重复素材。默认跳过重复原件，并将可合并的标签与分类归属保留到已有素材；也可以在设置中允许导入重复文件。侧栏的“重复文件”视图用于检查和合并库内重复项。
 - **随手采集**：支持从剪贴板导入文件或图片、截取屏幕区域，以及把网址保存为网页书签或下载链接指向的文件。
-- **浏览器扩展**：在 Chrome / Edge 中筛选并批量保存页面图片，也可保存书签、当前可见页面截图，或通过图片右键菜单采集。扩展通过本机令牌连接 HunterFile；启用步骤见[使用说明](docs/USER-GUIDE.md#浏览器采集)。
+- **浏览器扩展**：在 Chrome / Edge 中筛选并批量保存页面图片，也可保存书签、当前可见页面截图，或通过图片右键菜单采集。扩展通过本机令牌连接 HunterFiles；启用步骤见[使用说明](docs/USER-GUIDE.md#浏览器采集)。
 - **Eagle 资源库迁移**：只读打开 Eagle `.library`，复制可识别原件，并迁移文件夹层级、标签、备注、来源、星级和添加时间；不会修改源库。迁移范围和未转换内容见[迁移说明](docs/USER-GUIDE.md#资源库与迁移)。
 
 ### 整理与分类
@@ -44,7 +46,7 @@ HunterFile 使用 SwiftUI / AppKit 构建，资源库保存在本机，应用内
 ### 导出、备份与回收站
 
 - **灵活导出**：导出原件，可选附带 JSON 元数据；静态位图可转换成 PNG、JPEG、TIFF，并在导出时缩放或顺时针旋转。重名文件会自动编号，原件不会因预览或转换而降质。
-- **素材包与完整备份**：`.openeaglepack` 包含原件、文件夹层级、标签、评分、备注和图片标注，可导入其他 HunterFile 资源库。完整备份复制一致的数据库与素材，生成可重新打开的资源库。
+- **素材包与完整备份**：`.openeaglepack` 包含原件、文件夹层级、标签、评分、备注和图片标注，可导入其他 HunterFiles 资源库。完整备份复制一致的数据库与素材，生成可重新打开的资源库。
 - **可恢复的删除**：素材先进入应用内回收站，可以恢复；清空回收站时，原件和元数据会移入 macOS 废纸篓。合并重复项产生的重复原件也会保留在回收站。
 
 ### 本地智能功能、扩展与自动化
@@ -61,17 +63,17 @@ HunterFile 使用 SwiftUI / AppKit 构建，资源库保存在本机，应用内
 **环境要求**：macOS 14 或更新版本、Xcode 与 Swift 6 工具链。目前在 Apple Silicon Mac 上验证；Intel Mac 尚未实测。当前仓库提供源码构建方式，应用未做面向公众分发的 Developer ID 签名与公证。
 
 ```sh
-git clone https://github.com/Kevin-ho616/HunterFile.git
-cd HunterFile
+git clone https://github.com/Kevin-ho616/HunterFiles.git
+cd HunterFiles
 swift test
 ./script/build_and_run.sh --install
 ```
 
-安装脚本会把应用放到 `~/Applications/HunterFile.app`。如需先构建并验证启动，可运行 `./script/build_and_run.sh --verify`；`--release` 构建优化版本。
+安装脚本会把应用放到 `~/Applications/HunterFiles.app`。如需先构建并验证启动，可运行 `./script/build_and_run.sh --verify`；`--release` 构建优化版本。
 
-从 OpenEagle 升级时自动沿用已有设置、资源库路径和钥匙串凭据。`.openeagle` / `.openeaglepack`、旧 CLI 入口和插件桥继续兼容，改名不会移动或重写原件。
+从 HunterFile 或 OpenEagle 升级时，优先沿用 HunterFile 的已有设置，再补充 OpenEagle 设置，保留资源库路径、模型配置和钥匙串凭据。`.openeagle` / `.openeaglepack`、旧 `hunterfile.py` / `openeagle.py` 命令、令牌环境变量和插件桥继续兼容，改名不会移动或重写原件。
 
-首次启动会创建 `~/Pictures/HunterFile/我的资源库.openeagle`。打开应用后可以按下面的顺序体验：
+首次启动会创建 `~/Pictures/HunterFiles/我的资源库.openeagle`。打开应用后可以按下面的顺序体验：
 
 1. 按 `⌘I` 导入几张图片，或从 Finder 拖入一个文件夹。
 2. 在左侧创建文件夹，在右侧给素材添加标签、备注和评分。
@@ -88,19 +90,31 @@ swift test
 
 完整快捷键和逐步操作见[使用说明](docs/USER-GUIDE.md#快捷键)。
 
+## 启用本地 AI
+
+1. 打开 **HunterFiles → 设置 → AI**，在「本地 AI 搜索与分类」中选择本机的 EmbeddingGemma 2 文字与视觉 `.litertlm` 模型；它用于语义搜索、以图搜图和分类建议。
+2. 等待后台索引，打开搜索框旁的 **「AI 搜索」独立开关**，输入描述。未配置模型时，尝试开启会打开模型选择入口；索引进度与暂停操作位于设置页。
+3. 如需生成名称、摘要和素材问答，再选择 **Gemma 4 E2B** 生成模型。先预览建议，再勾选应用；名称与摘要编辑可撤销。
+
+模型下载链接、硬件需求、抽样限制和验证范围见 [本地 AI 指南](docs/LOCAL-AI.md)。本地模型推理不依赖云端 API；可选的在线视觉接口需要另行配置，并只在主动生成时发送选中素材。
+
 ## 数据存放与使用边界
+
+为兼容旧版本，文件扩展名、存储格式标记与系统文件类型标识保留原有协议；产品改名不会改写已有资源库。
 
 每个 `.openeagle` 资源库包含 `library.json`、`library.sqlite` 和 `assets/`。导入的原件复制进资源库，显示名称与磁盘上的存储文件名分离；SQLite 事务和文件原子移动保护导入过程。建议使用应用内“备份完整资源库”，或关闭应用后复制整个资源库目录。**不要让多个应用进程或多台设备同时写入同一个库。**
 
-HunterFile 可存储普通文件，但预览依赖 macOS 的解码能力与 Quick Look 扩展，不能保证所有 RAW、3D、Adobe 工程或视频编码都能在应用内完整显示。当前也不提供原件加密、云端协同、同步冲突合并或 Eagle Marketplace / 官方插件协议兼容。更多限制见[使用说明](docs/USER-GUIDE.md#当前边界)。
+HunterFiles 可存储普通文件，但预览依赖 macOS 的解码能力与 Quick Look 扩展，不能保证所有 RAW、3D、Adobe 工程或视频编码都能在应用内完整显示。当前也不提供原件加密、云端协同、同步冲突合并或 Eagle Marketplace / 官方插件协议兼容。更多限制见[使用说明](docs/USER-GUIDE.md#当前边界)。
 
 ## 文档与开发
 
 - [使用说明](docs/USER-GUIDE.md)：日常工作流、迁移、浏览器采集、智能功能与已知限制。
+- [本地 AI 设置与模型](docs/LOCAL-AI.md)：语义搜索、整理建议、生成和问答。
+- [图标与品牌素材](assets/branding/README.md)：H 图标原稿与生成说明。
 - [本地 API、CLI 与 MCP](docs/AUTOMATION.md)：接口、令牌、命令示例和插件协议。
 - [Eagle 功能研究与验收契约](docs/EAGLE-RESEARCH.md)：产品范围与独立实现边界。
 - [验收记录](docs/VERIFICATION.md)：现有自动化和手工验证记录。
 
-核心库 `HunterFileCore` 负责资源库事务、查询、迁移和元数据；macOS 应用负责视图、状态与系统集成。欢迎通过 Issue 反馈可复现的问题，或提交聚焦的 Pull Request。
+核心库 `HunterFilesCore` 负责资源库事务、查询、迁移和元数据；macOS 应用负责视图、状态与系统集成。欢迎通过 Issue 反馈可复现的问题，或提交聚焦的 Pull Request。
 
-代码采用 [MIT 许可证](LICENSE)。HunterFile 是独立开源项目，与 Eagle 官方无关联。
+代码采用 [MIT 许可证](LICENSE)。HunterFiles 是独立开源项目，与 Eagle 官方无关联。

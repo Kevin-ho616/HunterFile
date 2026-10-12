@@ -1,7 +1,7 @@
 import AppKit
 
 let root = URL(fileURLWithPath: CommandLine.arguments[1])
-let artwork = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent().appendingPathComponent("assets/branding/openeagle-app-icon-minimal.svg")
+let artwork = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent().appendingPathComponent("assets/branding/hunterfiles-app-icon.png")
 guard let icon = NSImage(contentsOf: artwork) else { fatalError("Cannot load icon artwork: \(artwork.path)") }
 let iconset = root.appendingPathComponent("AppIcon.iconset")
 try FileManager.default.createDirectory(at: iconset, withIntermediateDirectories: true)

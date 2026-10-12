@@ -1,6 +1,6 @@
 # 本地多模态 AI
 
-HunterFile 使用 EmbeddingGemma 2 文字与视觉 440M 做检索与分类排序，Gemma 4 E2B 生成名称、摘要与基于素材的问答。图片、视频与文档均在本机处理；两种模型用途不同，需要分别下载和选择。
+HunterFiles 使用 EmbeddingGemma 2 文字与视觉 440M 做检索与分类排序，Gemma 4 E2B 生成名称、摘要与基于素材的问答。图片、视频与文档均在本机处理；两种模型用途不同，需要分别下载和选择。
 
 ## 使用
 
@@ -33,12 +33,12 @@ HunterFile 使用 EmbeddingGemma 2 文字与视觉 440M 做检索与分类排序
 
 ```sh
 swift script/make_ai_test_media.swift test-output/ai-fixtures
-swift run HunterFileAIBenchmark /absolute/path/model.litertlm test-output/ai-fixtures cpu test-output/ai-benchmark-cpu.json
-swift run HunterFileAIBenchmark /absolute/path/model.litertlm test-output/ai-fixtures gpu test-output/ai-benchmark-gpu.json
+swift run HunterFilesAIBenchmark /absolute/path/model.litertlm test-output/ai-fixtures cpu test-output/ai-benchmark-cpu.json
+swift run HunterFilesAIBenchmark /absolute/path/model.litertlm test-output/ai-fixtures gpu test-output/ai-benchmark-gpu.json
 swift test --filter Semantic
 OPENEAGLE_TEST_MODEL=/absolute/path/model.litertlm swift test --filter LocalAIIntegrationTests
-HUNTERFILE_TEST_GENERATION_MODEL=/absolute/path/gemma-4-E2B-it.litertlm swift test --filter GenerationIntegrationTests
-OPENEAGLE_TEST_MODEL=/absolute/path/embeddinggemma-2-text-vision-440m.litertlm HUNTERFILE_TEST_GENERATION_MODEL=/absolute/path/gemma-4-E2B-it.litertlm swift test --filter GenerationStoreIntegrationTests
+HUNTERFILES_TEST_GENERATION_MODEL=/absolute/path/gemma-4-E2B-it.litertlm swift test --filter GenerationIntegrationTests
+OPENEAGLE_TEST_MODEL=/absolute/path/embeddinggemma-2-text-vision-440m.litertlm HUNTERFILES_TEST_GENERATION_MODEL=/absolute/path/gemma-4-E2B-it.litertlm swift test --filter GenerationStoreIntegrationTests
 ```
 
 测试答案在生成脚本中预先指定，共 12 张中文主题海报、12 份两页 PDF、1 段含 12 个主题画面的 72 秒视频及 50 条中文查询。视频只有一个文件，因此必须检查匹配时间段；文档同时检查匹配页码。报告保存逐条结果、排名、定位、延迟、模型修订和校验值。模型与生成素材不提交到 Git。
@@ -47,7 +47,7 @@ OPENEAGLE_TEST_MODEL=/absolute/path/embeddinggemma-2-text-vision-440m.litertlm H
 
 第一轮独立 QA 应用的界面检查使用 4 个受控文件，验证了模型选择、中文检索、PDF 第 2 页预览、视频 0:50 定位、以图排序、分类预览与应用、撤销及设置页的完成状态；没有修改正式应用或个人资源库。
 
-2026-10-12 的 HunterFileQA 界面检查沿用独立的 4 文件测试库：创建语义智能文件夹，从 0.60 调至 0.75 后范围收窄；关闭本地 AI 后显示空结果与启用提示。四项名称与摘要生成完成，取消勾选三项后仅应用一张图片，原名称保留，撤销后 AI 摘要消失；最终多行摘要框可实际编辑。问答来源链接分别打开 PDF 第 2 页与视频 0:50 的猫画面。设置页成功释放生成模型，模型路径保留。两种应用包与内嵌运行库均通过签名验证。
+2026-10-12 改名前 HunterFileQA 的界面检查沿用独立的 4 文件测试库：创建语义智能文件夹，从 0.60 调至 0.75 后范围收窄；关闭本地 AI 后显示空结果与启用提示。四项名称与摘要生成完成，取消勾选三项后仅应用一张图片，原名称保留，撤销后 AI 摘要消失；最终多行摘要框可实际编辑。问答来源链接分别打开 PDF 第 2 页与视频 0:50 的猫画面。设置页成功释放生成模型，模型路径保留。两种应用包与内嵌运行库均通过签名验证。
 
 真实生成回归分别运行，避免与原生窗口事件测试同时占用主线程：
 

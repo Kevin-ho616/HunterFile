@@ -1,6 +1,6 @@
 # LiteRT-LM
 
-HunterFile 使用 Google 官方 LiteRT-LM v0.18.0 macOS 二进制包，通过 C API 运行本地模型。其 Apache-2.0 许可证见 `LiteRT-LM.txt`，随应用一起打包。
+HunterFiles 使用 Google 官方 LiteRT-LM v0.18.0 macOS 二进制包，通过 C API 运行本地模型。其 Apache-2.0 许可证见 `LiteRT-LM.txt`，随应用一起打包。
 
 - 上游：https://github.com/google-ai-edge/LiteRT-LM/tree/v0.18.0
 - 发布包：https://github.com/google-ai-edge/LiteRT-LM/releases/download/v0.18.0/CLiteRTLM_mac.xcframework.zip

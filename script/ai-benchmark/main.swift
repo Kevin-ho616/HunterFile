@@ -1,6 +1,6 @@
 import Foundation
 import Darwin
-import HunterFileCore
+import HunterFilesCore
 
 struct Fixtures: Decodable {
     struct Media: Decodable { var file: String; var kind: String }
@@ -37,7 +37,7 @@ struct Report: Codable {
     static func main() async throws {
         let args = CommandLine.arguments
         guard args.count == 5, ["cpu", "gpu"].contains(args[3]) else {
-            throw LibraryError.message("Usage: swift run HunterFileAIBenchmark MODEL.litertlm FIXTURE_DIR cpu|gpu REPORT.json")
+            throw LibraryError.message("Usage: swift run HunterFilesAIBenchmark MODEL.litertlm FIXTURE_DIR cpu|gpu REPORT.json")
         }
         let root = URL(fileURLWithPath: args[2], isDirectory: true)
         let fixtures = try JSONDecoder().decode(Fixtures.self, from: Data(contentsOf: root.appendingPathComponent("manifest.json")))

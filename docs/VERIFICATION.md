@@ -96,3 +96,16 @@ swift script/make_test_media.swift "$PWD/test-output/Media Fixtures"
 ## 2026-10-12：AI 搜索独立开关
 
 按用户选择，将搜索框旁的星光按钮替换为「AI 搜索」文字加原生 switch，保留模型选择与搜索状态逻辑。宽窗口一行显示；空间不足时标题与搜索控件分为两行。独立空库实测模型未配置时弹出选择窗口、取消后保持关闭，已配置时开启/关闭、搜索提示及以图入口同步；约 1030 像素宽窗口中的标题、开关与三个布局选项完整显示。`swift build --product HunterFile` 和 19 项 `MediaTests|SemanticStoreTests` 检查通过。本轮为界面调整，没有重跑模型效果基准。
+
+
+## 2026-10-12 HunterFiles 品牌更新
+
+- 产品、SwiftPM 模块、应用标识、CLI/MCP、插件和浏览器扩展统一为 HunterFiles；GitHub 仓库同步改名，原 PR #1 保留。
+- 新增设置迁移优先级与幂等性验证：HunterFiles 当前设置优先，其次 HunterFile，再补 OpenEagle；QA 与正式设置分离。原钥匙串命名保留。
+- 三种资源库格式标记均可打开，已有 manifest 不重写，原件哈希与标签保留，未知格式被拒绝；新库沿用 HunterFile 存储标记供旧版本读取。
+- `swift test`：47 项通过，3 项真实模型测试按默认开关跳过；这次未重跑模型质量评测。
+- 新 H 图标由内置 imagegen 生成，AppKit 生成标准 ICNS 与 PNG；16 / 32 像素实际查看可识别 H。正式应用通过 `codesign --verify --deep --strict`，标识为 `com.kevin.HunterFiles`。
+- 三个可执行 CLI 入口均完成 MCP initialize / tools-list 检查，服务名 hunterfiles、6 个工具；新 / 前一版 / 初版令牌环境变量优先级通过 mock 请求检查，未输出真实凭据。
+- 新版 README 截图来自独立 HunterFilesReadme 公开受控库：25 个文件、3 个分类。核对实际 H 侧栏、产品名、AI 独立开关、属性面板与原生图片预览；设置的 AI 页包含检索及生成模型选择入口。测试库直接使用受控 fixture 准备，这些截图不作为目录导入或真实图库检索质量的证明。
+- 文件选择器一次误选上级目录后取消，确认 0 个原件被导入；产生的测试文件夹记录在退出独立实例后清除，公开演示库只含受控文件。未更改用户已有图库。
+- 旧应用包和当前工作目录路径保留；此次交付位于 dist/HunterFiles.app，未覆盖用户安装目录。浏览器扩展未安装到用户浏览器，Intel 与 macOS 14 设备未实测；应用仍为本地 ad-hoc 签名，未公证。

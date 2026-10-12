@@ -1,6 +1,6 @@
-# HunterFile 使用说明
+# HunterFiles 使用说明
 
-HunterFile 是原生 macOS 素材管理器。首次启动会在 `~/Pictures/HunterFile/我的资源库.openeagle` 建立独立资源库。可以在左上角菜单新建或切换资源库，也可以体验内置的独立示例库。
+HunterFiles 是原生 macOS 素材管理器。首次启动会在 `~/Pictures/HunterFiles/我的资源库.openeagle` 建立独立资源库。可以在左上角菜单新建或切换资源库，也可以体验内置的独立示例库。
 
 ## 日常使用
 
@@ -28,7 +28,7 @@ HunterFile 是原生 macOS 素材管理器。首次启动会在 `~/Pictures/Hunt
 - Eagle 的私有插件、智能文件夹内部规则、密码状态和时间轴标注不会在迁移时转换。缺失文件会逐项记录；请看任务记录。
 - 使用“备份完整资源库”生成一致的可重开备份。关闭应用后可用外置盘或同步工具复制整个资源库。**不支持多设备同时写同一个库**。
 - 外置磁盘离线、数据库缺失或损坏会报错，应用不会用空数据库替换已有素材。
-- 素材包保存原件、文件夹层级、标签、评分、备注与图片标注；可通过“导入素材”选择整个 `.openeaglepack` 包导入其他资源库。它是 HunterFile 自身格式，不兼容 Eagle 官方素材包；分享时不会复制文件夹密码。
+- 素材包保存原件、文件夹层级、标签、评分、备注与图片标注；可通过“导入素材”选择整个 `.openeaglepack` 包导入其他资源库。它是 HunterFiles 自身格式，不兼容 Eagle 官方素材包；分享时不会复制文件夹密码。
 
 ## 文件夹保护
 
@@ -38,7 +38,7 @@ HunterFile 是原生 macOS 素材管理器。首次启动会在 `~/Pictures/Hunt
 
 ## 浏览器采集
 
-1. HunterFile → 设置 → 扩展 → 启用本地采集 API。
+1. HunterFiles → 设置 → 扩展 → 启用本地采集 API。
 2. 点击“复制采集令牌”。
 3. 打开扩展文件夹，在 Chrome / Edge 扩展管理页启用开发者模式，选择“加载已解压的扩展”。
 4. 在扩展设置粘贴令牌并测试连接。
@@ -68,12 +68,12 @@ HunterFile 是原生 macOS 素材管理器。首次启动会在 `~/Pictures/Hunt
 设置 → 扩展可打开内置“素材统计与清单导出”插件，或打开包含 `plugin.json` 的本地 HTML 插件。插件 API：
 
 ```javascript
-const assets = await hunterfile.getSelection();
-const library = await hunterfile.getLibrary();
-await hunterfile.saveText('notes.txt', '由用户选择保存位置');
+const assets = await hunterfiles.getSelection();
+const library = await hunterfiles.getLibrary();
+await hunterfiles.saveText('notes.txt', '由用户选择保存位置');
 ```
 
-插件接口是 HunterFile 自身协议，并非 Eagle 的 Node.js/HTML 插件 API。只加载你信任的插件。
+插件接口是 HunterFiles 自身协议，并非 Eagle 的 Node.js/HTML 插件 API。只加载你信任的插件。
 
 ## 快捷键
 
