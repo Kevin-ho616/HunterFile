@@ -92,3 +92,7 @@ swift script/make_test_media.swift "$PWD/test-output/Media Fixtures"
 - `dist/HunterFile.app` 与 `dist/HunterFileQA.app`：构建成功，Info.plist 名称/标识、运行库嵌入、使用说明与兼容入口完整；`codesign --verify --deep --strict` 通过。没有替换 `~/Applications/OpenEagle.app` 或对个人资源库写入。
 
 未测试个人混合图库、大规模或长资料效果、Intel/macOS 14 实机、Developer ID 签名与公证。视频摘要与问答使用采样画面，没有音频转写；生成内容需要人工核对。
+
+## 2026-10-12：AI 搜索独立开关
+
+按用户选择，将搜索框旁的星光按钮替换为「AI 搜索」文字加原生 switch，保留模型选择与搜索状态逻辑。宽窗口一行显示；空间不足时标题与搜索控件分为两行。独立空库实测模型未配置时弹出选择窗口、取消后保持关闭，已配置时开启/关闭、搜索提示及以图入口同步；约 1030 像素宽窗口中的标题、开关与三个布局选项完整显示。`swift build --product HunterFile` 和 19 项 `MediaTests|SemanticStoreTests` 检查通过。本轮为界面调整，没有重跑模型效果基准。

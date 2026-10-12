@@ -77,21 +77,35 @@ struct ContentView: View {
         }
     }
     private var header: some View {
-        HStack(spacing: 14) {
-            VStack(alignment: .leading, spacing: 5) {
-                Text(store.title).font(.system(size: 23, weight: .semibold))
-                Text("\(store.total.formatted()) " + (store.filter.isEmpty && store.semanticImageVector == nil ? "个素材" : "个匹配素材") + (store.selection.isEmpty ? "" : " · 已选 \(store.selection.count) 项")).font(.system(size: 12)).foregroundStyle(.secondary)
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: 14) {
+                headerTitle
+                Spacer(minLength: 12)
+                searchControls
             }
-            Spacer(minLength: 12)
+            VStack(alignment: .leading, spacing: 12) {
+                headerTitle
+                searchControls
+            }
+        }.padding(.horizontal, 22).padding(.vertical, 20)
+    }
+    private var headerTitle: some View {
+        VStack(alignment: .leading, spacing: 5) {
+            Text(store.title).font(.system(size: 23, weight: .semibold))
+            Text("\(store.total.formatted()) " + (store.filter.isEmpty && store.semanticImageVector == nil ? "个素材" : "个匹配素材") + (store.selection.isEmpty ? "" : " · 已选 \(store.selection.count) 项")).font(.system(size: 12)).foregroundStyle(.secondary)
+        }.lineLimit(1)
+    }
+    private var searchControls: some View {
+        HStack(spacing: 8) {
             HStack(spacing: 7) {
                 Image(systemName: "magnifyingglass").foregroundStyle(.secondary)
                 TextField(store.semanticEnabled ? "描述画面或内容…" : "搜索名称、标签、备注…", text: $store.filter.query).textFieldStyle(.plain).focused($searchFocused)
                 if !store.filter.query.isEmpty { Button { store.filter.query = "" } label: { Image(systemName: "xmark.circle.fill").foregroundStyle(.secondary) }.buttonStyle(.plain) }
-            }.padding(9).background(.quaternary.opacity(0.45), in: RoundedRectangle(cornerRadius: 8)).frame(minWidth: 170, maxWidth: 280)
-            Button {
-                if store.localModelPath.isEmpty { store.chooseLocalModel() } else { store.semanticEnabled.toggle() }
-            } label: { Image(systemName: "sparkles").foregroundStyle(store.semanticEnabled ? Color.accentColor : .secondary) }
-                .buttonStyle(.plain).help("启用或关闭本地 AI 搜索").accessibilityLabel("本地 AI 搜索")
+            }.padding(9).background(.quaternary.opacity(0.45), in: RoundedRectangle(cornerRadius: 8)).frame(minWidth: 100, maxWidth: 280)
+            Toggle("AI 搜索", isOn: Binding(get: { store.semanticEnabled }, set: { enabled in
+                if store.localModelPath.isEmpty { store.chooseLocalModel() } else { store.semanticEnabled = enabled }
+            })).toggleStyle(.switch).controlSize(.small).font(.system(size: 12, weight: .medium)).fixedSize()
+                .help("启用或关闭本地 AI 搜索；未配置时选择检索模型")
             if store.semanticEnabled { Button { store.chooseSemanticImage() } label: { Image(systemName: "photo.on.rectangle") }.buttonStyle(.plain).help("以图搜索素材").accessibilityLabel("以图搜索素材") }
             Button { store.showFilters.toggle() } label: { Image(systemName: "line.3.horizontal.decrease.circle" + (!store.filter.isEmpty ? ".fill" : "")) }.buttonStyle(.plain).font(.title3).help("筛选")
             Menu {
@@ -106,7 +120,7 @@ struct ContentView: View {
                 Image(systemName: "rectangle.grid.1x2").tag("waterfall")
                 Image(systemName: "list.bullet").tag("list")
             }.pickerStyle(.segmented).labelsHidden().frame(width: 112).help("网格 / 瀑布流 / 列表")
-        }.padding(.horizontal, 22).padding(.vertical, 20)
+        }
     }
     @ViewBuilder private var folderBrowserHeader: some View {
         if case .folder = store.scope {
